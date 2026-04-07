@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      -webkit-app-region: drag;
+      user-select: none;
+      background: #f5f5f5;
+      border-bottom: 0.5px solid rgba(0, 0, 0, 0.12);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #2f2f2f;
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+      }
+      .nav-btn svg { stroke: #ccc; }
+      .nav-btn:not(:disabled):hover { background: rgba(255, 255, 255, 0.1); }
+      .nav-btn:disabled svg { stroke: #555; }
+    }
+
+    .spacer {
+      width: 70px;
+      flex-shrink: 0;
+    }
+
+    .nav-btn {
+      -webkit-app-region: no-drag;
+      border: none;
+      background: transparent;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      margin-right: 2px;
+    }
+
+    .nav-btn:not(:disabled):hover {
+      background: rgba(0, 0, 0, 0.06);
+    }
+
+    .nav-btn:disabled {
+      cursor: default;
+      opacity: 0.3;
+    }
+
+    .nav-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: #333;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .title {
+      flex: 1;
+      text-align: center;
+      font-size: 13px;
+      font-weight: 500;
+      color: #333;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding: 0 12px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      .title { color: #ccc; }
+    }
+  </style>
+</head>
+<body>
+  <div class="spacer"></div>
+  <button id="back" class="nav-btn" disabled title="Back">
+    <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+  </button>
+  <button id="forward" class="nav-btn" disabled title="Forward">
+    <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg>
+  </button>
+  <span id="title" class="title"></span>
+  <button id="reload" class="nav-btn" title="Reload">
+    <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+  </button>
+
+  <script>
+    const backBtn = document.getElementById("back");
+    const fwdBtn = document.getElementById("forward");
+    const reloadBtn = document.getElementById("reload");
+
+    backBtn.addEventListener("click", () => window.electronNav.goBack());
+    fwdBtn.addEventListener("click", () => window.electronNav.goForward());
+    reloadBtn.addEventListener("click", () => window.electronNav.reload());
+
+    window.electronNav.onNavState((state) => {
+      backBtn.disabled = !state.canGoBack;
+      fwdBtn.disabled = !state.canGoForward;
+    });
+
+    const titleEl = document.getElementById("title");
+    window.electronNav.onTitleUpdate((title) => {
+      titleEl.textContent = title;
+    });
+  </script>
+</body>
+</html>
