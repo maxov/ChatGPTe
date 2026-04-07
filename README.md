@@ -1,4 +1,4 @@
-# ChatGPT for Mac
+# ChatGPTe
 
 A lightweight Electron wrapper for [chatgpt.com](https://chatgpt.com) with a native macOS toolbar.
 
