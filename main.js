@@ -12,7 +12,7 @@ const path = require("path");
 const CHROME_UA =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-const ALLOWED_HOSTS = [".openai.com", ".auth0.com", ".chatgpt.com"];
+const ALLOWED_HOSTS = [".openai.com", ".auth0.com", ".chatgpt.com", ".chat.com"];
 const TOOLBAR_HEIGHT = 40;
 
 function isAllowedURL(url) {
@@ -24,6 +24,10 @@ function isAllowedURL(url) {
   } catch {
     return false;
   }
+}
+
+function isTransientPopupURL(url) {
+  return !url || url === "about:blank";
 }
 
 function createWindow() {
@@ -102,7 +106,7 @@ function setupNavigation(webContents) {
   });
 
   webContents.setWindowOpenHandler(({ url }) => {
-    if (!isAllowedURL(url)) {
+    if (!isAllowedURL(url) && !isTransientPopupURL(url)) {
       shell.openExternal(url);
       return { action: "deny" };
     }
@@ -111,15 +115,6 @@ function setupNavigation(webContents) {
 
   webContents.on("did-create-window", (child) => {
     setupNavigation(child.webContents);
-
-    child.webContents.on("will-navigate", (_event, url) => {
-      try {
-        const { hostname } = new URL(url);
-        if (hostname === "chatgpt.com" || hostname.endsWith(".chatgpt.com")) {
-          child.close();
-        }
-      } catch {}
-    });
   });
 }
 

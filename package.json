@@ -6,15 +6,15 @@
   "scripts": {
     "start": "electron .",
     "dist": "electron-builder --mac",
-    "install-app": "rm -rf ~/Applications/ChatGPT.app && cp -R dist/mac-arm64/ChatGPT.app ~/Applications/"
+    "install-app": "rm -rf ~/Applications/ChatGPTe.app && cp -R dist/mac-arm64/ChatGPTe.app ~/Applications/"
   },
   "devDependencies": {
     "electron": "^35.0.0",
     "electron-builder": "^26.0.0"
   },
   "build": {
-    "appId": "com.chatgpt.wrapper",
-    "productName": "ChatGPT",
+    "appId": "org.maxov.chatgpte",
+    "productName": "ChatGPTe",
     "mac": {
       "target": "dmg",
       "category": "public.app-category.productivity"
