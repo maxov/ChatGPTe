@@ -5,7 +5,11 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "dist": "electron-builder --mac",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win --x64",
+    "dist:linux": "electron-builder --linux --x64",
+    "dist:all": "pnpm dist:mac && pnpm dist:win && pnpm dist:linux",
     "install-app": "rm -rf ~/Applications/ChatGPTe.app && cp -R dist/mac-arm64/ChatGPTe.app ~/Applications/"
   },
   "devDependencies": {
@@ -15,9 +19,39 @@
   "build": {
     "appId": "org.maxov.chatgpte",
     "productName": "ChatGPTe",
+    "directories": {
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "toolbar.html",
+      "preload-toolbar.js",
+      "package.json"
+    ],
     "mac": {
       "target": "dmg",
+      "icon": "icon.icns",
       "category": "public.app-category.productivity"
+    },
+    "win": {
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "icon": "icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": [
+        "AppImage",
+        "tar.gz"
+      ],
+      "icon": "icons",
+      "category": "Network"
     }
   },
   "pnpm": {

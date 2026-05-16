@@ -9,11 +9,27 @@ const {
 } = require("electron");
 const path = require("path");
 
-const CHROME_UA =
-  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
-
+const APP_NAME = "ChatGPTe";
+const CHROME_VERSION = "131.0.0.0";
 const ALLOWED_HOSTS = [".openai.com", ".auth0.com", ".chatgpt.com", ".chat.com"];
 const TOOLBAR_HEIGHT = 40;
+
+app.setName(APP_NAME);
+
+function getUserAgentPlatform() {
+  switch (process.platform) {
+    case "win32":
+      return "Windows NT 10.0; Win64; x64";
+    case "linux":
+      return "X11; Linux x86_64";
+    default:
+      return "Macintosh; Intel Mac OS X 10_15_7";
+  }
+}
+
+function getChromeUserAgent() {
+  return `Mozilla/5.0 (${getUserAgentPlatform()}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${CHROME_VERSION} Safari/537.36`;
+}
 
 function isAllowedURL(url) {
   try {
@@ -31,12 +47,17 @@ function isTransientPopupURL(url) {
 }
 
 function createWindow() {
+  const isMac = process.platform === "darwin";
   const win = new BaseWindow({
     width: 1200,
     height: 800,
-    title: "",
-    titleBarStyle: "hidden",
-    trafficLightPosition: { x: 12, y: 12 },
+    title: APP_NAME,
+    ...(isMac
+      ? {
+          titleBarStyle: "hidden",
+          trafficLightPosition: { x: 12, y: 12 },
+        }
+      : {}),
     backgroundColor: "#f7f7f8",
   });
 
@@ -72,7 +93,9 @@ function createWindow() {
   layoutViews();
   win.on("resize", layoutViews);
 
-  toolbarView.webContents.loadFile("toolbar.html");
+  toolbarView.webContents.loadFile("toolbar.html", {
+    query: { platform: process.platform },
+  });
   chatView.webContents.loadURL("https://chatgpt.com");
 
   // Send navigation state updates to toolbar
@@ -119,7 +142,7 @@ function setupNavigation(webContents) {
 }
 
 app.whenReady().then(() => {
-  session.fromPartition("persist:chatgpt").setUserAgent(CHROME_UA);
+  session.fromPartition("persist:chatgpt").setUserAgent(getChromeUserAgent());
 
   // IPC handlers for toolbar navigation buttons
   ipcMain.on("nav-back", (event) => {
@@ -149,19 +172,24 @@ app.whenReady().then(() => {
     }
   });
 
+  const isMac = process.platform === "darwin";
   const template = [
-    {
-      label: app.name,
-      submenu: [
-        { role: "about" },
-        { type: "separator" },
-        { role: "hide" },
-        { role: "hideOthers" },
-        { role: "unhide" },
-        { type: "separator" },
-        { role: "quit" },
-      ],
-    },
+    ...(isMac
+      ? [
+          {
+            label: app.name,
+            submenu: [
+              { role: "about" },
+              { type: "separator" },
+              { role: "hide" },
+              { role: "hideOthers" },
+              { role: "unhide" },
+              { type: "separator" },
+              { role: "quit" },
+            ],
+          },
+        ]
+      : []),
     {
       label: "File",
       submenu: [
@@ -170,7 +198,8 @@ app.whenReady().then(() => {
           accelerator: "CmdOrCtrl+N",
           click: () => createWindow(),
         },
-        { role: "close" },
+        { type: "separator" },
+        isMac ? { role: "close" } : { role: "quit" },
       ],
     },
     {
@@ -219,7 +248,9 @@ app.whenReady().then(() => {
     },
     {
       label: "Window",
-      submenu: [{ role: "minimize" }, { role: "zoom" }],
+      submenu: isMac
+        ? [{ role: "minimize" }, { role: "zoom" }]
+        : [{ role: "minimize" }, { role: "close" }],
     },
   ];
   Menu.setApplicationMenu(Menu.buildFromTemplate(template));

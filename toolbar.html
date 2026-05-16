@@ -17,7 +17,7 @@
       --icon-color: oklch(27% 0.006 260);
       --icon-disabled-color: oklch(62% 0.006 260);
       --title-color: oklch(27% 0.006 260);
-      font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       height: 40px;
       display: flex;
       align-items: center;
@@ -44,8 +44,12 @@
     }
 
     .spacer {
-      width: 70px;
+      width: 8px;
       flex-shrink: 0;
+    }
+
+    body[data-platform="darwin"] .spacer {
+      width: 70px;
     }
 
     .nav-btn {
@@ -112,6 +116,10 @@
   </style>
 </head>
 <body>
+  <script>
+    document.body.dataset.platform =
+      new URLSearchParams(window.location.search).get("platform") || "";
+  </script>
   <div class="spacer"></div>
   <button id="back" class="nav-btn" disabled title="Back">
     <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
